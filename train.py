@@ -79,7 +79,7 @@ for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
 
     if epoch % opt.save_epoch_freq == 0 or epoch == 1:
         print('saving the model at the end of epoch %d, iters %d' %
-            (epoch, total_steps))
+            (epoch, total_steps[phase]))
         model.save(epoch)
 
     if epoch % opt.display_epoch_freq == 0 or epoch == 1:
