@@ -45,14 +45,23 @@ class BaseOptions():
         self.parser.add_argument('--padding_type', type=str, default='reflect', help='# of input image channels')
         self.parser.add_argument('--pairLst', type=str, default='./keypoint_data/market-pairs-train.csv', help='market pairs')
 
+        self.parser.add_argument('--trainPairLst', type=str, default='./market_data/market-pairs-train.csv', help='market train pairs')
+        self.parser.add_argument('--testPairLst', type=str, default='./market_data/market-pairs-test.csv', help='market test pairs')
+        self.parser.add_argument('--genPairLst', type=str, default='./market_data/market-pairs-generate.csv', help='market generate pairs')
+
+        self.parser.add_argument('--dset', type=str, default='train', help='select dataset')
+
         self.parser.add_argument('--with_D_PP', type=int, default=1, help='use D to judge P and P is pair or not')
         self.parser.add_argument('--with_D_PB', type=int, default=1, help='use D to judge P and B is pair or not')
 
         self.parser.add_argument('--use_flip', type=int, default=0, help='flip or not')
 
+        self.parser.add_argument('--log_dir', type=str, default='log', help='select tensorboard log dir')
+        self.parser.add_argument('--img_dir', type=str, default='images', help='select image dump dir')
         # down-sampling times
         self.parser.add_argument('--G_n_downsampling', type=int, default=2, help='down-sampling blocks for generator')
         self.parser.add_argument('--D_n_downsampling', type=int, default=2, help='down-sampling blocks for discriminator')
+        self.parser.add_argument('--torch_home', type=str, default='./checkpoints', help='location for downloading pretrained networks')
 
         self.initialized = True
 
@@ -79,6 +88,8 @@ class BaseOptions():
         for k, v in sorted(args.items()):
             print('%s: %s' % (str(k), str(v)))
         print('-------------- End ----------------')
+
+        os.makedirs(self.opt.img_dir, exist_ok=True)
 
         # save to the disk
         expr_dir = os.path.join(self.opt.checkpoints_dir, self.opt.name)

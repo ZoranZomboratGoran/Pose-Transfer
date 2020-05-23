@@ -11,13 +11,13 @@ import torch
 
 
 class KeyDataset(BaseDataset):
-    def initialize(self, opt):
+    def initialize(self, opt, phase, pairList, dset):
         self.opt = opt
+        self.phase = phase
         self.root = opt.dataroot
-        self.dir_P = os.path.join(opt.dataroot, opt.phase) #person images
-        self.dir_K = os.path.join(opt.dataroot, opt.phase + 'K') #keypoints
-
-        self.init_categories(opt.pairLst)
+        self.dir_P = os.path.join(opt.dataroot, dset) #person images
+        self.dir_K = os.path.join(opt.dataroot, dset + 'K') #keypoints
+        self.init_categories(pairList)
         self.transform = get_transform(opt)
 
     def init_categories(self, pairLst):
@@ -32,7 +32,7 @@ class KeyDataset(BaseDataset):
         print('Loading data pairs finished ...')
 
     def __getitem__(self, index):
-        if self.opt.phase == 'train':
+        if self.phase == 'train':
             index = random.randint(0, self.size-1)
 
         P1_name, P2_name = self.pairs[index]
@@ -50,7 +50,7 @@ class KeyDataset(BaseDataset):
         BP1_img = np.load(BP1_path) # h, w, c
         BP2_img = np.load(BP2_path) 
         # use flip
-        if self.opt.phase == 'train' and self.opt.use_flip:
+        if self.phase == 'train' and self.opt.use_flip:
             # print ('use_flip ...')
             flip_random = random.uniform(0,1)
             
@@ -90,9 +90,11 @@ class KeyDataset(BaseDataset):
                 
 
     def __len__(self):
-        if self.opt.phase == 'train':
+        if self.phase == 'train':
             return 4000
-        elif self.opt.phase == 'test':
+        elif self.phase == 'test':
+            return self.size
+        else:
             return self.size
 
     def name(self):

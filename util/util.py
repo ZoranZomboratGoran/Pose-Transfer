@@ -18,6 +18,16 @@ def tensor2im(image_tensor, imtype=np.uint8):
     image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
     return image_numpy.astype(imtype)
 
+def tensor2im_batch(image_tensor, imtype=np.uint8):
+    tensor_batches = image_tensor.cpu().float().numpy()
+    image_batches = []
+    for image_numpy in tensor_batches:
+        if image_numpy.shape[0] == 1:
+            image_numpy = np.tile(image_numpy, (3, 1, 1))
+        image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
+        image_batches.append(image_numpy.astype(imtype))
+    return image_batches
+
 
 # draw pose img
 LIMB_SEQ = [[1,2], [1,5], [2,3], [3,4], [5,6], [6,7], [1,8], [8,9],
@@ -55,6 +65,15 @@ def map_to_cord(pose_map, threshold=0.1):
             y_values.append(MISSING_VALUE)
 
     return np.concatenate([np.expand_dims(y_values, -1), np.expand_dims(x_values, -1)], axis=1)
+
+def draw_pose_from_map_batched(pose_map, threshold=0.1, **kwargs):
+    pose_list = []
+    for pose in pose_map:
+        # CHW -> HCW -> HWC
+        pose_map_ = pose.cpu().transpose(1, 0).transpose(2, 1).numpy()
+        cords = map_to_cord(pose_map_, threshold=threshold)
+        pose_list.append(draw_pose_from_cords(cords, pose_map_.shape[:2], **kwargs))
+    return pose_list
 
 def draw_pose_from_map(pose_map, threshold=0.1, **kwargs):
     # CHW -> HCW -> HWC

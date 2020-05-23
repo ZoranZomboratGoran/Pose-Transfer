@@ -4,7 +4,7 @@ import ntpath
 import time
 from . import util
 from . import html
-
+from torch.utils.tensorboard import SummaryWriter
 
 class Visualizer():
     def __init__(self, opt):
@@ -18,7 +18,7 @@ class Visualizer():
         if self.display_id > 0:
             import visdom
             self.vis = visdom.Visdom(port=opt.display_port)
-
+        self.writer = SummaryWriter(opt.log_dir)
         if self.use_html:
             self.web_dir = os.path.join(opt.checkpoints_dir, opt.name, 'web')
             self.img_dir = os.path.join(self.web_dir, 'images')
@@ -113,14 +113,18 @@ class Visualizer():
             win=self.display_id)
 
     # errors: same format as |errors| of plotCurrentErrors
-    def print_current_errors(self, epoch, i, errors, t):
-        message = '(epoch: %d, iters: %d, time: %.3f) ' % (epoch, i, t)
+    def print_current_errors(self, phase, epoch, i, errors, t):
+        message = 'Phase:%s (epoch: %d, iters: %d, time: %.3f) ' % (phase, epoch, i, t)
         for k, v in errors.items():
             message += '%s: %.3f ' % (k, v)
+            self.writer.add_scalar('%s/batch/%s' % (k, phase),
+                    v, i)
 
         print(message)
         with open(self.log_name, "a") as log_file:
             log_file.write('%s\n' % message)
+
+        self.writer.flush()
 
     # save image to the disk
     def save_images(self, webpage, visuals, image_path):
@@ -143,3 +147,13 @@ class Visualizer():
             txts.append(label)
             links.append(image_name)
         webpage.add_images(ims, txts, links, width=self.win_size)
+
+    # save image to the disk
+    def save_fakes(self, visuals, image_path):
+        image_dir = "fakes"
+        for _, image_numpy in visuals.items():
+            save_path = os.path.join(image_dir, image_path)
+            util.save_image(image_numpy, save_path)
+
+    def close(self):
+        self.writer.close()

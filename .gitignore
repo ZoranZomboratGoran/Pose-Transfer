@@ -1,0 +1,9 @@
+fashio_data/*
+market_data/*
+__pycache__
+.vscode
+checkpoints
+results*
+fakes/*
+images/*
+log/*

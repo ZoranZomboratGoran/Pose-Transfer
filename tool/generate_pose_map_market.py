@@ -5,9 +5,13 @@ import os
 
 MISSING_VALUE = -1
 
-img_dir  = 'market_data/train' #raw image path
-annotations_file = 'market_data/market-annotation-train.csv' #pose annotation path
-save_path = 'market_data/trainK' #path to store pose maps
+# img_dir  = 'market_data/train' #raw image path
+# annotations_file = 'market_data/market-annotation-train.csv' #pose annotation path
+# save_path = 'market_data/trainK' #path to store pose maps
+
+img_dir  = 'market_data/test' #raw image path
+annotations_file = 'market_data/market-annotation-test.csv' #pose annotation path
+save_path = 'market_data/testK' #path to store pose maps
 
 def load_pose_cords_from_strings(y_str, x_str):
     y_cords = json.loads(y_str)

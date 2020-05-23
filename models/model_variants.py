@@ -58,7 +58,6 @@ class PATBlock(nn.Module):
     def forward(self, x1, x2):
         x1_out = self.conv_block_stream1(x1)
         x2_out = self.conv_block_stream2(x2)
-        # att = F.sigmoid(x2_out)
         att = torch.sigmoid(x2_out)
 
         x1_out = x1_out * att

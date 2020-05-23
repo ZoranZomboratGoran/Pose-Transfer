@@ -2,7 +2,7 @@ import torch.utils.data
 from data.base_data_loader import BaseDataLoader
 
 
-def CreateDataset(opt):
+def CreateDataset(opt, phase, pairList, dset):
     dataset = None
     
     if opt.dataset_mode == 'keypoint':
@@ -13,7 +13,7 @@ def CreateDataset(opt):
         raise ValueError("Dataset [%s] not recognized." % opt.dataset_mode)
 
     print("dataset [%s] was created" % (dataset.name()))
-    dataset.initialize(opt)
+    dataset.initialize(opt, phase, pairList, dset)
     return dataset
 
 
@@ -21,9 +21,9 @@ class CustomDatasetDataLoader(BaseDataLoader):
     def name(self):
         return 'CustomDatasetDataLoader'
 
-    def initialize(self, opt):
+    def initialize(self, opt, phase, pairList, dset):
         BaseDataLoader.initialize(self, opt)
-        self.dataset = CreateDataset(opt)
+        self.dataset = CreateDataset(opt, phase, pairList, dset)
         self.dataloader = torch.utils.data.DataLoader(
             self.dataset,
             batch_size=opt.batchSize,
