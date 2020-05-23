@@ -135,11 +135,11 @@ class TransferModel(BaseModel):
     def backward_G(self, mode = 'train'):
         if self.opt.with_D_PB:
             pred_fake_PB = self.netD_PB(torch.cat((self.fake_p2, self.input_BP2), 1))
-            self.loss_G_GAN_PB = self.criterionGAN(pred_fake_PB, True)
+            loss_G_GAN_PB = self.criterionGAN(pred_fake_PB, True)
 
         if self.opt.with_D_PP:
             pred_fake_PP = self.netD_PP(torch.cat((self.fake_p2, self.input_P1), 1))
-            self.loss_G_GAN_PP = self.criterionGAN(pred_fake_PP, True)
+            loss_G_GAN_PP = self.criterionGAN(pred_fake_PP, True)
 
         # L1 loss
         if self.opt.L1_type == 'l1_plus_perL1' :
@@ -153,13 +153,13 @@ class TransferModel(BaseModel):
 
         pair_L1loss = self.loss_G_L1
         if self.opt.with_D_PB:
-            pair_GANloss = self.loss_G_GAN_PB * self.opt.lambda_GAN
+            pair_GANloss = loss_G_GAN_PB * self.opt.lambda_GAN
             if self.opt.with_D_PP:
-                pair_GANloss += self.loss_G_GAN_PP * self.opt.lambda_GAN
+                pair_GANloss += loss_G_GAN_PP * self.opt.lambda_GAN
                 pair_GANloss = pair_GANloss / 2
         else:
             if self.opt.with_D_PP:
-                pair_GANloss = self.loss_G_GAN_PP * self.opt.lambda_GAN
+                pair_GANloss = loss_G_GAN_PP * self.opt.lambda_GAN
 
         if self.opt.with_D_PB or self.opt.with_D_PP:
             pair_loss = pair_L1loss + pair_GANloss
@@ -172,6 +172,9 @@ class TransferModel(BaseModel):
         self.pair_L1loss = pair_L1loss.item()
         if self.opt.with_D_PB or self.opt.with_D_PP:
             self.pair_GANloss = pair_GANloss.item()
+
+        self.loss_G_GAN_PB = loss_G_GAN_PB.item()
+        self.loss_G_GAN_PP = loss_G_GAN_PP.item()
 
 
     def backward_D_basic(self, netD, real, fake, mode = 'train'):

@@ -1,4 +1,4 @@
-fashio_data/*
+fashion_data/*
 market_data/*
 __pycache__
 .vscode
@@ -7,3 +7,4 @@ results*
 fakes/*
 images/*
 log/*
+fakes_market.tar.gz
