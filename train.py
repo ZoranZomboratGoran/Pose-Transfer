@@ -48,8 +48,14 @@ for _, data in enumerate(generate_dataset):
     model.save_visuals(0)
 
 for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
-    epoch_start_time = time.time()
+
     for phase in phases:
+
+        if phase == 'test':
+            if epoch != 1 and epoch % opt.validate_freq != 0:
+                continue
+
+        epoch_start_time = time.time()
         model.clear_running_error()
         epoch_iter = 0
         if phase == 'train':

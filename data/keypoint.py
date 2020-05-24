@@ -14,6 +14,7 @@ class KeyDataset(BaseDataset):
     def initialize(self, opt, phase, pairList, dset):
         self.opt = opt
         self.phase = phase
+        self.dset = dset
         self.root = opt.dataroot
         self.dir_P = os.path.join(opt.dataroot, dset) #person images
         self.dir_K = os.path.join(opt.dataroot, dset + 'K') #keypoints
@@ -90,10 +91,8 @@ class KeyDataset(BaseDataset):
                 
 
     def __len__(self):
-        if self.phase == 'train':
-            return 4000
-        elif self.phase == 'test':
-            return self.size
+        if self.phase == 'train' and self.dset == 'train':
+            return 4096
         else:
             return self.size
 
