@@ -26,6 +26,7 @@ class TransferModel(BaseModel):
 
         nb = opt.batchSize
         size = opt.fineSize
+        self.running_err = OrderedDict()
 
         input_nc = [opt.P_input_nc, opt.BP_input_nc+opt.BP_input_nc]
         self.netG = networks.define_G(input_nc, opt.P_input_nc,
@@ -233,6 +234,27 @@ class TransferModel(BaseModel):
                 if mode == 'train':
                     self.optimizer_D_PB.step()
 
+        self.add_to_running_error()
+
+    def clear_running_error(self):
+        self.running_err['G_L1loss'] = 0
+        self.running_err['G_origin_L1'] = 0
+        self.running_err['G_perceptual_L1'] = 0
+        self.running_err['G_GANloss'] = 0
+        self.running_err['G_PP_GANloss'] = 0
+        self.running_err['G_PB_GANloss'] = 0
+        self.running_err['D_PP_GANloss'] = 0
+        self.running_err['D_PB_GANloss'] = 0
+
+    def get_epoch_errors(self, iterations):
+        for k, v in self.running_err.items():
+            self.running_err[k] = v / iterations
+        return self.running_err
+
+    def add_to_running_error(self):
+        cur_err = self.get_current_errors()
+        for k, v in cur_err.items():
+            self.running_err[k] += v
 
     def get_current_errors(self):
         ret_errors = OrderedDict()

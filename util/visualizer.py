@@ -120,10 +120,31 @@ class Visualizer():
             self.writer.add_scalar('%s/batch/%s' % (k, phase),
                     v, i)
 
-        print(message)
         with open(self.log_name, "a") as log_file:
             log_file.write('%s\n' % message)
 
+        self.writer.flush()
+
+    # errors: same format as |errors| of plotCurrentErrors
+    def print_epoch_errors(self, phase, epoch, errors, t):
+        message = 'Phase:%s (epoch: %d, cum_time: %.3f) ' % (phase, epoch, t)
+        for k, v in errors.items():
+            message += '%s: %.3f ' % (k, v)
+            self.writer.add_scalar('%s/epoch/%s' % (k, phase),
+                    v, epoch)
+
+        with open(self.log_name, "a") as log_file:
+            log_file.write('%s\n' % message)
+
+        self.writer.flush()
+
+    def print_sched_param(self, epoch, lr):
+        message = 'Epoch %d Learning rate %.7f' % (epoch , lr)
+
+        with open(self.log_name, "a") as log_file:
+            log_file.write('%s\n' % message)
+
+        self.writer.add_scalar('LR', lr, epoch)
         self.writer.flush()
 
     # save image to the disk

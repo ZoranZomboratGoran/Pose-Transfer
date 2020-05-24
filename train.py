@@ -36,14 +36,12 @@ opt.no_flip = no_flip_save
 model = create_model(opt)
 visualizer = Visualizer(opt)
 
-phases = ['train', 'validate']
+phases = ['train', 'test']
 datasets = {}
 datasets[phases[0]] = train_dataset
 datasets[phases[1]] = test_dataset
-epoch_iter = {phases[0]:0, phases[1]:0}
 total_steps = {phases[0]:0, phases[1]:0}
 
-print('displaying initial visuals before training')
 model = model.eval()
 for _, data in enumerate(generate_dataset):
     model.set_input(data)
@@ -52,46 +50,42 @@ for _, data in enumerate(generate_dataset):
 
 for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
     epoch_start_time = time.time()
-
-    for phase in phases:
-
-        epoch_iter[phase] = 0
+    for phase in ['train']:
+        model.clear_running_error()
+        epoch_iter = 0
         if phase == 'train':
             model.train()
         else:
             model.eval()
 
         for batch, data in enumerate(datasets[phase]):
-            if batch == 2:
-                break
             iter_start_time = time.time()
             visualizer.reset()
             total_steps[phase] += opt.batchSize
-            epoch_iter[phase] += opt.batchSize
+            epoch_iter += opt.batchSize
             model.set_input(data)
             model.optimize_parameters(phase)
 
-            errors = model.get_current_errors()
-
             if total_steps[phase] % opt.print_freq == 0:
+                errors = model.get_current_errors()
                 t = (time.time() - iter_start_time) / opt.batchSize
-                visualizer.print_current_errors(phase ,epoch, epoch_iter[phase], errors, t)
+                visualizer.print_current_errors(phase, epoch, total_steps[phase], errors, t)
+
+        epoch_t = time.time() - epoch_start_time
+        epoch_errors = model.get_epoch_errors(epoch_iter)
+        visualizer.print_epoch_errors(phase, epoch, epoch_errors, epoch_t)
 
     if epoch % opt.save_epoch_freq == 0 or epoch == 1:
-        print('saving the model at the end of epoch %d, iters %d' %
-            (epoch, total_steps[phase]))
         model.save(epoch)
 
     if epoch % opt.display_epoch_freq == 0 or epoch == 1:
-        print('displaying visuals at the end of epoch %d' % epoch)
         model = model.eval()
         for i, data in enumerate(generate_dataset):
             model.set_input(data)
             model.test()
             model.save_visuals(epoch)
 
-    print('End of epoch %d / %d \t Time Taken: %d sec' %
-          (epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
-    model.update_learning_rate()
+    lr = model.update_learning_rate()
+    visualizer.print_sched_param(epoch, lr)
 
 visualizer.close()
