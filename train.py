@@ -50,7 +50,7 @@ for _, data in enumerate(generate_dataset):
 
 for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
     epoch_start_time = time.time()
-    for phase in ['train']:
+    for phase in phases:
         model.clear_running_error()
         epoch_iter = 0
         if phase == 'train':
