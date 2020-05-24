@@ -40,7 +40,6 @@ phases = ['train', 'test']
 datasets = {}
 datasets[phases[0]] = train_dataset
 datasets[phases[1]] = test_dataset
-total_steps = {phases[0]:0, phases[1]:0}
 
 model = model.eval()
 for _, data in enumerate(generate_dataset):
@@ -61,15 +60,9 @@ for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
         for batch, data in enumerate(datasets[phase]):
             iter_start_time = time.time()
             visualizer.reset()
-            total_steps[phase] += opt.batchSize
-            epoch_iter += opt.batchSize
+            epoch_iter += 1
             model.set_input(data)
             model.optimize_parameters(phase)
-
-            if total_steps[phase] % opt.print_freq == 0:
-                errors = model.get_current_errors()
-                t = (time.time() - iter_start_time) / opt.batchSize
-                visualizer.print_current_errors(phase, epoch, total_steps[phase], errors, t)
 
         epoch_t = time.time() - epoch_start_time
         epoch_errors = model.get_epoch_errors(epoch_iter)
@@ -88,4 +81,5 @@ for epoch in range(opt.epoch_count, opt.niter + opt.niter_decay + 1):
     lr = model.update_learning_rate()
     visualizer.print_sched_param(epoch, lr)
 
+model.save('latest')
 visualizer.close()
