@@ -8,3 +8,5 @@ fakes/*
 images/*
 log/*
 fakes_market.tar.gz
+figures/
+gan_model*
